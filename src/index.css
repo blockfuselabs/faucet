@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+}
+
+
+.btn-shadow {
+  box-shadow: 0px 4px 20px 0px #0000001A;
+}
+
+.btn-bouncy {
+  transition: transform 0.1s;
+}
+
+.btn-bouncy:active {
+  transform: scale(0.99);
+}

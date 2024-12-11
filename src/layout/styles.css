@@ -1,0 +1,22 @@
+.header {
+  @apply flex items-center justify-between w-[50%] absolute top-[44px] left-[20px] ;
+  font-family: "Space Grotesk", sans-serif;
+}
+
+.logo-container {
+  @apply flex items-center gap-3 w-fit;
+}
+
+.connect-wallet-btn {
+  @apply w-[200px] h-[40px] rounded-[100px] text-[14px] text-white font-bold;
+  background: #9c2cf399;
+  transition: transform 0.2s;
+}
+
+.connect-wallet-btn:active {
+  transform: scale(0.99);
+}
+
+.nav-button {
+  @apply w-fit h-[35px] rounded-[100px] text-[14px] px-4 bg-[#FFFFFF] border border-[#4E2EF5];
+}
