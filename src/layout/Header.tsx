@@ -7,6 +7,9 @@ import "./styles.css";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+//connect wallet
+import { ConnectKitButton } from "connectkit";
+
 const Header = () => {
   const [isFaucet, setIsFaucet] = useState(false);
   const navigate = useNavigate();
@@ -21,6 +24,8 @@ const Header = () => {
   };
 
   return (
+
+   
     <div className="header">
       <div className="logo-container">
         <img src={blockfuse_logo} alt="LOGO" />
@@ -33,9 +38,16 @@ const Header = () => {
         <button className="nav-button btn-bouncy" onClick={handleFaucetClick}>
           {isFaucet ? 'Go Home' : 'Mint Faucet'}
         </button>
-        <button className="connect-wallet-btn">Connect wallet</button>
+        {/* <button className="connect-wallet-btn"></button> */}
+        <ConnectKitButton
+          customTheme={{
+            "--ck-connectbutton-background": "#9c2cf399",
+            "--ck-connectbutton-color": "#000",
+            "--ck-connectbutton-border-radius": "20px"
+          }} />
       </div>
     </div>
+ 
   );
 };
 
