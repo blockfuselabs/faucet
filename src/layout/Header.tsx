@@ -36,7 +36,7 @@ const Header = () => {
 
       <div className="flex items-center gap-4">
         <button className="nav-button btn-bouncy" onClick={handleFaucetClick}>
-          {isFaucet ? 'Mint NFT' : 'Mint Faucet'}
+          {isFaucet ? 'Mint NFT' : 'Claim Faucet'}
         </button>
         {/* <button className="connect-wallet-btn"></button> */}
         <ConnectKitButton

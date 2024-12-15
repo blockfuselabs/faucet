@@ -191,7 +191,7 @@ const Home: React.FC = () => {
           >
             {localTransactionStatus === "pending"
               ? "Minting..."
-              : "Mint the Blockfuse Labs NFT"}
+              : "Mint Blockfuse Labs NFT"}
           </button>
 
           {localTransactionStatus === "completed" && (
