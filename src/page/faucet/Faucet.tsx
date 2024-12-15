@@ -17,7 +17,7 @@ const membershipNFTAbi = parseAbi([
 ]);
 
 const faucetAbi = parseAbi(["function claim() public"]);
-const faucetAddress = "0xdF720266bF6052af1a07d05Fccc0a24fb30F5537";
+const faucetAddress = "0xa4419B2eD1b18CA9854Ae95e1BA96C737Aa20065";
 
 const Faucet: React.FC = () => {
   const { isConnected, address } = useAccount();
@@ -48,36 +48,36 @@ const Faucet: React.FC = () => {
     }
   }, [isSuccess, isError]);
 
-  const checkNFTOwnership = async (): Promise<boolean> => {
-    if (!address || !publicClient) {
-      toast.error("Please connect your wallet first.");
-      return false;
-    }
+  // const checkNFTOwnership = async (): Promise<boolean> => {
+  //   if (!address || !publicClient) {
+  //     toast.error("Please connect your wallet first.");
+  //     return false;
+  //   }
   
-    try {
-      setIsCheckingNFT(true);
-      const tokenId = 0n; // Use 0n for BigInt
-      const nftBalance = await publicClient.readContract({
-        address: membershipNFTAddress,
-        abi: membershipNFTAbi,
-        functionName: "balanceOf",
-        args: [address, tokenId],
-      });
+  //   try {
+  //     setIsCheckingNFT(true);
+  //     const tokenId = 0n; 
+  //     // const nftBalance = await publicClient.readContract({
+  //     //   address: membershipNFTAddress,
+  //     //   abi: membershipNFTAbi,
+  //     //   functionName: "balanceOf",
+  //     //   args: [address, tokenId],
+  //     // });
   
-      if (Number(nftBalance) > 0) {
-        return true;
-      } else {
-        toast.error("You need to own the BlockFuse Labs NFT to claim faucet funds.");
-        return false;
-      }
-    } catch (error) {
-      console.error("Error checking NFT ownership:", error);
-      toast.error("Failed to verify NFT ownership. Please try again.");
-      return false;
-    } finally {
-      setIsCheckingNFT(false);
-    }
-  };
+  //   //   if (Number(nftBalance) > 0) {
+  //   //     return true;
+  //   //   } else {
+  //   //     toast.error("You need to own the BlockFuse Labs NFT to claim faucet funds.");
+  //   //     return false;
+  //   //   }
+  //   // } catch (error) {
+  //   //   console.error("Error checking NFT ownership:", error);
+  //   //   toast.error("Failed to verify NFT ownership. Please try again.");
+  //   //   return false;
+  //   } finally {
+  //     setIsCheckingNFT(false);
+  //   }
+  // };
   
   const claimFaucet = useCallback(async () => {
     if (!isConnected || !address) {
@@ -86,10 +86,10 @@ const Faucet: React.FC = () => {
     }
 
     // Check NFT ownership before proceeding
-    const hasNFT = await checkNFTOwnership();
-    if (!hasNFT) {
-      return;
-    }
+    // const hasNFT = await checkNFTOwnership();
+    // if (!hasNFT) {
+    //   return;
+    // }
 
     try {
       setLocalTransactionStatus("pending");
