@@ -1,0 +1,44 @@
+name: Deploy Blockfuselabs Faucet Website to cPanel
+
+on:
+  push:
+    branches:
+      - feat/mintfaucet
+
+jobs:
+  FTP-Deploy-Action:
+    name: 🎉 Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 🚚 Get latest code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 2
+      
+      - name: 📂 Navigate to directory
+        working-directory: ./
+        run: echo "Switched to the directory"
+      
+      - name: 🛠 Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'
+      
+      - name: 📦 Install dependencies
+        working-directory: ./
+        run: npm install
+      
+      - name: 🔨 Build the React.js app
+        working-directory: ./
+        run: npm run build
+      
+      - name: 📂 Sync folders and files to the server
+        uses: SamKirkland/FTP-Deploy-Action@4.3.3
+        with:
+          server: ${{ vars.FTP_SERVER }}
+          username: ${{ vars.FTP_USERNAME }}
+          password: ${{ vars.FTP_PASSWORD }}
+          server-dir: faucet.blockfuselabs.com/
+          local-dir: './dist/'
+
