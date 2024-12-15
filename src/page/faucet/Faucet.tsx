@@ -4,17 +4,17 @@ import {
   useAccount, 
   useWriteContract, 
   useWaitForTransactionReceipt, 
-  usePublicClient 
+  // usePublicClient 
 } from "wagmi";
 import { parseAbi, Hash } from "viem";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 
-const membershipNFTAddress = "0x093B762004178D1D7Bc083Bb5A01438CecC2B6d5";
-const membershipNFTAbi = parseAbi([
-  "function balanceOf(address account, uint256 id) public view returns (uint256)",
-]);
+// const membershipNFTAddress = "0x093B762004178D1D7Bc083Bb5A01438CecC2B6d5";
+// const membershipNFTAbi = parseAbi([
+//   "function balanceOf(address account, uint256 id) public view returns (uint256)",
+// ]);
 
 const faucetAbi = parseAbi(["function claim() public"]);
 const faucetAddress = "0xa4419B2eD1b18CA9854Ae95e1BA96C737Aa20065";
@@ -25,9 +25,9 @@ const Faucet: React.FC = () => {
   const [localTransactionStatus, setLocalTransactionStatus] = useState<
     "idle" | "pending" | "completed" | "failed"
   >("idle");
-  const [isCheckingNFT, setIsCheckingNFT] = useState(false);
+  const [isCheckingNFT] = useState(false);
 
-  const publicClient = usePublicClient();
+  // const publicClient = usePublicClient();
 
   const { 
     writeContract: write, 
