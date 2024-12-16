@@ -3,37 +3,25 @@ import mint_arrow from "../../assets/faucet/mint_arrow.svg";
 import { 
   useAccount, 
   useWriteContract, 
-  useWaitForTransactionReceipt, 
-  usePublicClient 
+  useWaitForTransactionReceipt 
 } from "wagmi";
 import { parseAbi, Hash } from "viem";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-
-const membershipNFTAddress = "0x093B762004178D1D7Bc083Bb5A01438CecC2B6d5";
-const membershipNFTAbi = parseAbi([
-  "function balanceOf(address account, uint256 id) public view returns (uint256)",
-]);
 
 const faucetAbi = parseAbi(["function claim() public"]);
 const faucetAddress = "0xa4419B2eD1b18CA9854Ae95e1BA96C737Aa20065";
 
 const Faucet: React.FC = () => {
   const { isConnected, address } = useAccount();
-  const [transactionHash] = useState<Hash | null>(null);
+  const [transactionHash, setTransactionHash] = useState<Hash | null>(null);
   const [localTransactionStatus, setLocalTransactionStatus] = useState<
     "idle" | "pending" | "completed" | "failed"
   >("idle");
-  const [isCheckingNFT, setIsCheckingNFT] = useState(false);
 
-  const publicClient = usePublicClient();
+  const { writeContract: write } = useWriteContract();
 
-  const { 
-    writeContract: write, 
-  } = useWriteContract();
-
-  const { isSuccess, isError, isLoading: isTransactionPending } = useWaitForTransactionReceipt({
+  const { isSuccess, isError } = useWaitForTransactionReceipt({
     hash: transactionHash ?? undefined,
   });
 
@@ -48,58 +36,32 @@ const Faucet: React.FC = () => {
     }
   }, [isSuccess, isError]);
 
-  // const checkNFTOwnership = async (): Promise<boolean> => {
-  //   if (!address || !publicClient) {
-  //     toast.error("Please connect your wallet first.");
-  //     return false;
-  //   }
-  
-  //   try {
-  //     setIsCheckingNFT(true);
-  //     const tokenId = 0n; 
-  //     // const nftBalance = await publicClient.readContract({
-  //     //   address: membershipNFTAddress,
-  //     //   abi: membershipNFTAbi,
-  //     //   functionName: "balanceOf",
-  //     //   args: [address, tokenId],
-  //     // });
-  
-  //   //   if (Number(nftBalance) > 0) {
-  //   //     return true;
-  //   //   } else {
-  //   //     toast.error("You need to own the BlockFuse Labs NFT to claim faucet funds.");
-  //   //     return false;
-  //   //   }
-  //   // } catch (error) {
-  //   //   console.error("Error checking NFT ownership:", error);
-  //   //   toast.error("Failed to verify NFT ownership. Please try again.");
-  //   //   return false;
-  //   } finally {
-  //     setIsCheckingNFT(false);
-  //   }
-  // };
-  
   const claimFaucet = useCallback(async () => {
     if (!isConnected || !address) {
       toast.error("Please connect your wallet first.");
       return;
     }
 
-    // Check NFT ownership before proceeding
-    // const hasNFT = await checkNFTOwnership();
-    // if (!hasNFT) {
-    //   return;
-    // }
-
     try {
       setLocalTransactionStatus("pending");
       toast.info("Claiming faucet funds...");
 
-      write({
-        address: faucetAddress,
-        abi: faucetAbi,
-        functionName: "claim",
+      const result = await new Promise<Hash>((resolve, reject) => {
+        write({
+          address: faucetAddress,
+          abi: faucetAbi,
+          functionName: "claim",
+        }, {
+          onSuccess: (hash) => resolve(hash as Hash),
+          onError: (error) => reject(error),
+        });
       });
+
+      if (result) {
+        setTransactionHash(result);
+      } else {
+        throw new Error("Failed to retrieve transaction hash");
+      }
     } catch (err: any) {
       console.error("Error during claim:", err);
 
@@ -116,7 +78,6 @@ const Faucet: React.FC = () => {
       }
     }
   }, [isConnected, address, write]);
-
 
   return (
     <div className="h-screen w-full flex">
@@ -139,14 +100,10 @@ const Faucet: React.FC = () => {
             onClick={claimFaucet}
             disabled={
               !isConnected ||
-              isTransactionPending ||
-              localTransactionStatus === "pending" ||
-              isCheckingNFT
+              localTransactionStatus === "pending"
             }
           >
-            {isCheckingNFT
-              ? "Checking NFT..."
-              : localTransactionStatus === "pending"
+            {localTransactionStatus === "pending"
               ? "Claiming..."
               : "Receive 0.0002"}
           </button>
