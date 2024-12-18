@@ -9,10 +9,7 @@ import {
 import { parseAbi, Hash } from "viem";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { rejects } from "assert";
-import { readContract } from "viem/actions";
-import { hash } from "crypto";
-import { data } from "react-router-dom";
+
 
 const Home: React.FC = () => {
   const { isConnected, address } = useAccount();
@@ -22,12 +19,12 @@ const Home: React.FC = () => {
     "function balanceOf(address account, uint256 id) public view returns (uint256)",
   ]);
 
-  const { data: balance, isLoading } = useReadContract({
-    abi: nftAbi,
-    address: nftAddress,
-    functionName: "balanceOf",
-    args: [address, 1n],
-  });
+const { data: balance, isLoading } = useReadContract({
+  abi: nftAbi,
+  address: nftAddress,
+  functionName: "balanceOf",
+  args: [address ?? "0x0000000000000000000000000000000000000000", 1n],
+});
 
   if (isLoading) {
     console.log("Loading balance...");
@@ -110,68 +107,76 @@ const Home: React.FC = () => {
   // checkNFTOwnership();
 
   const mintNFT = useCallback(async () => {
-    if (!isConnected || !address) {
-      toast.error("Please connect your wallet first.");
-      return;
+  if (!isConnected || !address) {
+    toast.error("Please connect your wallet first.");
+    return;
+  }
+
+  // Check if the user owns the NFT before proceeding with minting
+  const hasOwnership = await checkNFTOwnership();
+  if (!hasOwnership) {
+    return; 
+  }
+
+  if (balance != undefined || Number(balance) > 0) {
+    toast.error("You cannot mint the NFT more than once");
+    return;
+  }
+
+  console.log(balance);
+
+  try {
+    setLocalTransactionStatus("pending");
+    toast.info("Minting...");
+
+    const result = await new Promise<Hash>((resolve, reject) => {
+      writeContract(
+        {
+          address: nftAddress,
+          abi: nftAbi,
+          functionName: "mint",
+          args: [address, 1n, "0x"],
+        },
+        {
+          onSuccess: (hash) => resolve(hash as Hash),
+          onError: (error) => reject(error),
+        }
+      );
+    });
+
+    if (result) {
+      setTransactionHash(result);
+    } else {
+      throw new Error("Failed to retrieve transaction hash");
+    }
+  } catch (err: any) {
+    console.error("Full Error Object:", err);
+
+    const isUserRejection =
+      err.message?.includes("User denied transaction") ||
+      err.message?.includes("Transaction was rejected") ||
+      err.code === 4001 ||
+      err.name === "UserRejectedRequestError";
+
+    if (isUserRejection) {
+      toast.info("Transaction canceled by the user.");
+    } else {
+      toast.error(`Unexpected error: ${err.message || "Unknown error"}`);
     }
 
-    if (balance != undefined || Number(balance) > 0) {
-      toast.error("You cannot mint the NFT more than once");
-      return;
-    }
+    setLocalTransactionStatus("idle");
+  }
+}, [
+  isConnected,
+  address,
+  writeContract,
+  readContract,
+  nftAddress,
+  nftAbi,
+  balance,
+]);
 
-    console.log(ubalance);
 
-    try {
-      setLocalTransactionStatus("pending");
-      toast.info("Minting...");
-
-      const result = await new Promise<Hash>((resolve, reject) => {
-        writeContract(
-          {
-            address: nftAddress,
-            abi: nftAbi,
-            functionName: "mint",
-            args: [address, 1n, "0x"],
-          },
-          {
-            onSuccess: (hash) => resolve(hash as Hash),
-            onError: (error) => reject(error),
-          }
-        );
-      });
-
-      if (result) {
-        setTransactionHash(result);
-      } else {
-        throw new Error("Failed to retrieve transaction hash");
-      }
-    } catch (err: any) {
-      console.error("Full Error Object:", err);
-
-      const isUserRejection =
-        err.message?.includes("User denied transaction") ||
-        err.message?.includes("Transaction was rejected") ||
-        err.code === 4001 ||
-        err.name === "UserRejectedRequestError";
-
-      if (isUserRejection) {
-        toast.info("Transaction canceled by the user.");
-      } else {
-        toast.error(`Unexpected error: ${err.message || "Unknown error"}`);
-      }
-
-      setLocalTransactionStatus("idle");
-    }
-  }, [
-    isConnected,
-    address,
-    writeContract,
-    readContract,
-    nftAddress,
-    nftAbi,
-    balance,
-  ]);
 
   return (
     <div className="h-screen w-full flex">
